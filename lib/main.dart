@@ -9,11 +9,8 @@ class Quizzler extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: QuizPage(title: 'Flutter Demo Home Page'),
+      title: 'Quizzler',
+      home: QuizPage(title: 'Quizzler Questions'),
     );
   }
 }
@@ -32,22 +29,32 @@ QuizBrain quizBrain = QuizBrain();
 class _QuizPageState extends State<QuizPage> {
   List<Icon> scoreKeeper = [];
 
-  void checkAnswer(bool userPickedAnswer) {
+  void checkAnswer(String userPickedAnswer) {
     bool correctAnswer = quizBrain.getCorrectAnswer();
+    bool userAnswer = true;
+    if (userPickedAnswer != 'true') {
+      userAnswer = !userAnswer;
+    }
     setState(() {
       if (quizBrain.isFinished() == false) {
         quizBrain.calcProgress();
-        if (userPickedAnswer == correctAnswer) {
+        if (userAnswer == correctAnswer && userPickedAnswer != 'maybe') {
           quizBrain.calcCorrectRate(true);
           scoreKeeper.add(Icon(
             Icons.check,
             color: Colors.green,
           ));
-        } else {
+        } else if (userAnswer != correctAnswer && userPickedAnswer != 'maybe') {
           quizBrain.calcCorrectRate(false);
           scoreKeeper.add(Icon(
             Icons.close,
             color: Colors.red,
+          ));
+        } else {
+          quizBrain.calcCorrectRate(false);
+          scoreKeeper.add(Icon(
+            Icons.circle,
+            color: Colors.grey,
           ));
         }
         quizBrain.nextQuestion();
@@ -127,7 +134,7 @@ class _QuizPageState extends State<QuizPage> {
                 ),
               ),
               onPressed: () {
-                checkAnswer(true);
+                checkAnswer("true");
               },
             ),
           ),
@@ -146,7 +153,26 @@ class _QuizPageState extends State<QuizPage> {
                 ),
               ),
               onPressed: () {
-                checkAnswer(false);
+                checkAnswer("false");
+              },
+            ),
+          ),
+        ),
+        Expanded(
+          child: Padding(
+            padding: EdgeInsets.all(10.0),
+            child: FlatButton(
+              textColor: Colors.white,
+              color: Colors.grey,
+              child: Text(
+                'Maybe',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20.0,
+                ),
+              ),
+              onPressed: () {
+                checkAnswer("maybe");
               },
             ),
           ),
