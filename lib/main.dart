@@ -36,33 +36,75 @@ class _QuizPageState extends State<QuizPage> {
       userAnswer = !userAnswer;
     }
     setState(() {
+      quizBrain.calcProgress();
+      if (userAnswer == correctAnswer && userPickedAnswer != 'maybe') {
+        quizBrain.calcCorrectRate(true);
+        scoreKeeper.add(Icon(
+          Icons.check,
+          color: Colors.green,
+        ));
+      } else if (userAnswer != correctAnswer && userPickedAnswer != 'maybe') {
+        quizBrain.calcCorrectRate(false);
+        scoreKeeper.add(Icon(
+          Icons.close,
+          color: Colors.red,
+        ));
+      } else {
+        quizBrain.calcCorrectRate(false);
+        quizBrain.addMaybe();
+        scoreKeeper.add(Icon(
+          Icons.circle,
+          color: Colors.grey,
+        ));
+      }
       if (quizBrain.isFinished() == false) {
-        quizBrain.calcProgress();
-        if (userAnswer == correctAnswer && userPickedAnswer != 'maybe') {
-          quizBrain.calcCorrectRate(true);
-          scoreKeeper.add(Icon(
-            Icons.check,
-            color: Colors.green,
-          ));
-        } else if (userAnswer != correctAnswer && userPickedAnswer != 'maybe') {
-          quizBrain.calcCorrectRate(false);
-          scoreKeeper.add(Icon(
-            Icons.close,
-            color: Colors.red,
-          ));
-        } else {
-          quizBrain.calcCorrectRate(false);
-          scoreKeeper.add(Icon(
-            Icons.circle,
-            color: Colors.grey,
-          ));
-        }
         quizBrain.nextQuestion();
       } else {
+        quizBrain.showQuizResults(context);
         quizBrain.reset();
         scoreKeeper = [];
       }
     });
+  }
+
+  Widget buildText(String text) {
+    return Expanded(
+        flex: 5,
+        child: Padding(
+          padding: EdgeInsets.all(2.0),
+          child: Center(
+            child: Text(
+              text,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 25.0,
+                color: Colors.white,
+              ),
+            ),
+          ),
+        ));
+  }
+
+  Widget buildButton(String buttonText, Color buttonColor, String answerInput) {
+    return Expanded(
+      child: Padding(
+        padding: EdgeInsets.all(10.0),
+        child: FlatButton(
+          textColor: Colors.white,
+          color: buttonColor,
+          child: Text(
+            buttonText,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 20.0,
+            ),
+          ),
+          onPressed: () {
+            checkAnswer(answerInput);
+          },
+        ),
+      ),
+    );
   }
 
   @override
@@ -71,112 +113,14 @@ class _QuizPageState extends State<QuizPage> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        Expanded(
-            flex: 5,
-            child: Padding(
-              padding: EdgeInsets.all(10.0),
-              child: Center(
-                child: Text(
-                  quizBrain.getQuestionText(),
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 25.0,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            )),
-        Expanded(
-            flex: 5,
-            child: Padding(
-              padding: EdgeInsets.all(2.0),
-              child: Center(
-                child: Text(
-                  'Correct Rate: ' +
-                      quizBrain.getCorrectRate().toString() +
-                      '%',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 25.0,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            )),
-        Expanded(
-            flex: 5,
-            child: Padding(
-              padding: EdgeInsets.all(2.0),
-              child: Center(
-                child: Text(
-                  'Total Progress: ' +
-                      quizBrain.getProgressRate().toString() +
-                      '%',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 25.0,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            )),
-        Expanded(
-          child: Padding(
-            padding: EdgeInsets.all(10.0),
-            child: FlatButton(
-              textColor: Colors.white,
-              color: Colors.green,
-              child: Text(
-                'True',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20.0,
-                ),
-              ),
-              onPressed: () {
-                checkAnswer("true");
-              },
-            ),
-          ),
-        ),
-        Expanded(
-          child: Padding(
-            padding: EdgeInsets.all(10.0),
-            child: FlatButton(
-              textColor: Colors.white,
-              color: Colors.red,
-              child: Text(
-                'False',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20.0,
-                ),
-              ),
-              onPressed: () {
-                checkAnswer("false");
-              },
-            ),
-          ),
-        ),
-        Expanded(
-          child: Padding(
-            padding: EdgeInsets.all(10.0),
-            child: FlatButton(
-              textColor: Colors.white,
-              color: Colors.grey,
-              child: Text(
-                'Maybe',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 20.0,
-                ),
-              ),
-              onPressed: () {
-                checkAnswer("maybe");
-              },
-            ),
-          ),
-        ),
+        buildText(quizBrain.getQuestionText()),
+        buildText(
+            'Correct Rate: ' + quizBrain.getCorrectRate().toString() + '%'),
+        buildText(
+            'Total Progress: ' + quizBrain.getProgressRate().toString() + '%'),
+        buildButton('True', Colors.green, 'true'),
+        buildButton('False', Colors.red, 'false'),
+        buildButton('Maybe', Colors.grey, 'maybe'),
         Row(
           children: scoreKeeper,
         ),

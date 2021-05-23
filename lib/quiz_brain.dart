@@ -1,9 +1,12 @@
+import 'package:flutter/material.dart';
+
 import 'question.dart';
 
 class QuizBrain {
   int _questionNumber = 0;
   int _progress = 0;
   int _correctAnswers = 0;
+  int _maybeAnswers = 0;
   double _correctRate = 0.0;
   double _progressRate = 0.0;
 
@@ -47,6 +50,10 @@ class QuizBrain {
     _progressRate = _progress / _questionBank.length;
   }
 
+  void addMaybe() {
+    this._maybeAnswers += 1;
+  }
+
   double getProgressRate() {
     return _progressRate;
   }
@@ -62,8 +69,37 @@ class QuizBrain {
   void reset() {
     _progress = 0;
     _correctAnswers = 0;
+    _maybeAnswers = 0;
     _progressRate = 0.0;
     _correctRate = 0.0;
     _questionNumber = 0;
+  }
+
+  showQuizResults(BuildContext context) {
+    Widget okButton = FlatButton(
+      child: Text("OK"),
+      onPressed: () {
+        Navigator.pop(context);
+      },
+    );
+    AlertDialog alerta = AlertDialog(
+      title: Text("RESULTS"),
+      content: Text("Correct answers: " +
+          this._correctAnswers.toString() +
+          "\n'Maybe' answers: " +
+          this._maybeAnswers.toString() +
+          "\nTotal score: " +
+          this._correctRate.toStringAsFixed(2) +
+          "%"),
+      actions: [
+        okButton,
+      ],
+    );
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return alerta;
+      },
+    );
   }
 }
